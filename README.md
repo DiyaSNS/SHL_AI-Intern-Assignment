@@ -1,2 +1,4 @@
 # SHL_AI-Intern-Assignment
-Build a Conversational SHL Assessment Recommender
+
+A conversational FastAPI service that recommends SHL individual assessments through dialogue.
+
