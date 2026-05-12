@@ -284,7 +284,7 @@ def get_client() -> genai.GenerativeModel:
     if not api_key:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY not configured")
     genai.configure(api_key=api_key)
-    return genai.GenerativeModel("gemini-1.5-flash")
+    return genai.GenerativeModel("gemini-2.0-flash")
 
 
 
