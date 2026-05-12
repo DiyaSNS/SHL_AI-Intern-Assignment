@@ -40,7 +40,10 @@ POST /chat
 
 ```bash
 pip install -r requirements.txt
-export ANTHROPIC_API_KEY=sk-...
+export AZURE_OPENAI_API_KEY=your-azure-key
+export AZURE_OPENAI_ENDPOINT=https://YOUR-RESOURCE.openai.azure.com/
+export AZURE_OPENAI_API_VERSION=2024-02-01
+export AZURE_OPENAI_DEPLOYMENT=gpt-4o
 uvicorn main:app --reload
 ```
 
@@ -56,7 +59,12 @@ uvicorn main:app --reload
 
 ```bash
 docker build -t shl-agent .
-docker run -e ANTHROPIC_API_KEY=sk-... -p 8000:8000 shl-agent
+docker run \
+  -e AZURE_OPENAI_API_KEY=your-azure-key \
+  -e AZURE_OPENAI_ENDPOINT=https://YOUR-RESOURCE.openai.azure.com/ \
+  -e AZURE_OPENAI_API_VERSION=2024-02-01 \
+  -e AZURE_OPENAI_DEPLOYMENT=gpt-4o \
+  -p 8000:8000 shl-agent
 ```
 
 ## Testing
