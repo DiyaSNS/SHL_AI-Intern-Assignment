@@ -278,19 +278,22 @@ def extract_query_context(messages: list[Message]) -> str:
     return " ".join(user_msgs)
 
 
-# ---------------------------------------------------------------------------
-# Anthropic client
-# ---------------------------------------------------------------------------
-def get_client() -> anthropic.Anthropic:
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+
+def get_client() -> AzureOpenAI:
+    api_key = os.environ.get("AZURE_OPENAI_API_KEY")
+    azure_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
+    api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-02-01")
     if not api_key:
-        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured")
-    return anthropic.Anthropic(api_key=api_key)
+        raise HTTPException(status_code=500, detail="AZURE_OPENAI_API_KEY not configured")
+    if not azure_endpoint:
+        raise HTTPException(status_code=500, detail="AZURE_OPENAI_ENDPOINT not configured")
+    return AzureOpenAI(
+        api_key=api_key,
+        azure_endpoint=azure_endpoint,
+        api_version=api_version,
+    )
 
 
-# ---------------------------------------------------------------------------
-# Parse and validate agent response
-# ---------------------------------------------------------------------------
 def parse_response(raw: str, messages: list[Message]) -> ChatResponse:
     """Parse the LLM JSON output and validate URLs against catalogue."""
     # Strip accidental markdown fences
@@ -419,22 +422,22 @@ def chat(request: ChatRequest) -> ChatResponse:
     ]
 
     client = get_client()
+    deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-4o")
 
     start = time.time()
     try:
-        response = client.messages.create(
-            model="claude-haiku-4-5-20251001",  # Fast & cheap; upgrade to sonnet if quality insufficient
+        response = client.chat.completions.create(
+            model=deployment,
             max_tokens=1024,
-            system=system_prompt,
-            messages=anthropic_messages,
+            messages=[{"role": "system", "content": system_prompt}] + anthropic_messages,
         )
-    except anthropic.APITimeoutError:
-        raise HTTPException(status_code=504, detail="LLM timeout")
-    except anthropic.APIError as e:
+    except Exception as e:
+        if "timeout" in str(e).lower():
+            raise HTTPException(status_code=504, detail="LLM timeout")
         raise HTTPException(status_code=502, detail=f"LLM error: {e}")
 
     elapsed = time.time() - start
-    raw_text = response.content[0].text if response.content else ""
+    raw_text = response.choices[0].message.content if response.choices else ""
 
     result = parse_response(raw_text, messages)
     return result
