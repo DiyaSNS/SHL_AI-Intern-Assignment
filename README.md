@@ -38,22 +38,11 @@ POST /chat
 
 ## Local Development
 
-```bash
-pip install -r requirements.txt
-export AZURE_OPENAI_API_KEY=your-azure-key
-export AZURE_OPENAI_ENDPOINT=https://YOUR-RESOURCE.openai.azure.com/
-export AZURE_OPENAI_API_VERSION=2024-02-01
-export AZURE_OPENAI_DEPLOYMENT=gpt-4o
-uvicorn main:app --reload
-```
+
 
 ## Deploy to Render
 
-1. Push this directory to a GitHub repo.
-2. Create a new **Web Service** on [render.com](https://render.com), connect the repo.
-3. Set environment variable `ANTHROPIC_API_KEY` in Render's dashboard.
-4. Render auto-detects `render.yaml` — build and start commands are pre-configured.
-5. First health check allows up to 2 minutes for cold start.
+
 
 ## Deploy with Docker
 
