@@ -53,7 +53,7 @@ POST /chat
 
 - **Retrieval**: TF-IDF over 377 catalogue items + keyword boosts for anchor products.
   Each query retrieves top-25 candidates injected into the system prompt (~1,200 tokens).
-- **LLM**: Claude Haiku 4.5 for speed; swap to Sonnet in `main.py` for higher quality.
+- **LLM**: Groq - LLaMA-3.3-70B-versatile
 - **Safety**: Pre-LLM keyword filter catches injection/off-topic. Post-LLM URL validator
   drops any hallucinated items not in the catalogue.
 - **Stateless**: No per-session storage. Full history sent on every request.
