@@ -49,14 +49,6 @@ POST /chat
 
 ## Testing
 
-```bash
-# Offline unit + integration tests (no API key needed)
-python test_agent.py --url http://localhost:8000
-
-# Or against a deployed endpoint
-python test_agent.py --url https://your-service.onrender.com
-```
-
 ## Architecture
 
 - **Retrieval**: TF-IDF over 377 catalogue items + keyword boosts for anchor products.
