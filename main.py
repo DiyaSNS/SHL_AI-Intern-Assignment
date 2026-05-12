@@ -11,7 +11,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-import google.generativeai as genai
+from groq import Groq
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
@@ -279,13 +279,11 @@ def extract_query_context(messages: list[Message]) -> str:
 
 
 
-def get_client() -> genai.GenerativeModel:
-    api_key = os.environ.get("GEMINI_API_KEY")
+def get_client() -> Groq:
+    api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
-        raise HTTPException(status_code=500, detail="GEMINI_API_KEY not configured")
-    genai.configure(api_key=api_key)
-    return genai.GenerativeModel("gemini-2.0-flash")
-
+        raise HTTPException(status_code=500, detail="GROQ_API_KEY not configured")
+    return Groq(api_key=api_key)
 
 
 def parse_response(raw: str, messages: list[Message]) -> ChatResponse:
@@ -417,22 +415,12 @@ def chat(request: ChatRequest) -> ChatResponse:
 
     client = get_client()
 
-    # Gemini takes history as alternating user/model turns, system prompt separate
-    gemini_history = []
-    for m in anthropic_messages[:-1]:  # all except last message
-        gemini_history.append({
-            "role": "user" if m["role"] == "user" else "model",
-            "parts": [m["content"]]
-        })
-
-    last_message = anthropic_messages[-1]["content"]
-
     start = time.time()
     try:
-        chat = client.start_chat(history=gemini_history)
-        response = chat.send_message(
-            f"{system_prompt}\n\n{last_message}",
-            generation_config=genai.types.GenerationConfig(max_output_tokens=1024)
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            max_tokens=1024,
+            messages=[{"role": "system", "content": system_prompt}] + anthropic_messages,
         )
     except Exception as e:
         if "timeout" in str(e).lower():
@@ -440,7 +428,7 @@ def chat(request: ChatRequest) -> ChatResponse:
         raise HTTPException(status_code=502, detail=f"LLM error: {e}")
 
     elapsed = time.time() - start
-    raw_text = response.text if response.text else ""
+    raw_text = response.choices[0].message.content if response.choices else ""
 
     result = parse_response(raw_text, messages)
     return result
