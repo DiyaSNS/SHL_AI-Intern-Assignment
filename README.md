@@ -57,15 +57,6 @@ uvicorn main:app --reload
 
 ## Deploy with Docker
 
-```bash
-docker build -t shl-agent .
-docker run \
-  -e AZURE_OPENAI_API_KEY=your-azure-key \
-  -e AZURE_OPENAI_ENDPOINT=https://YOUR-RESOURCE.openai.azure.com/ \
-  -e AZURE_OPENAI_API_VERSION=2024-02-01 \
-  -e AZURE_OPENAI_DEPLOYMENT=gpt-4o \
-  -p 8000:8000 shl-agent
-```
 
 ## Testing
 
